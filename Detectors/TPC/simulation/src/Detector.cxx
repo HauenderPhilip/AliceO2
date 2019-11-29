@@ -104,7 +104,8 @@ void Detector::SetSpecialPhysicsCuts()
 
   FairRun* fRun = FairRun::Instance();
   if (strcmp(fRun->GetName(), "TGeant3") == 0) {
-    const Float_t cut1 = 1e-5;
+    // Original: 1e-5 but smaller value for small energy electrons
+    const Float_t cut1 = 1e-6;
     const Float_t cutTofmax = 1e10;
 
     // Some cuts implemented in AliRoot
@@ -121,7 +122,9 @@ void Detector::SetSpecialPhysicsCuts()
                              {ECut::kCUTMUO, cut1},
                              {ECut::kBCUTE, cut1},
                              {ECut::kBCUTM, cut1},
-                             {ECut::kDCUTE, cut1},
+                             // Cut for Delta Electrons higher, otherwise
+                             // too many Delta Electrons get produced
+                             {ECut::kDCUTE, 100*cut1},
                              {ECut::kDCUTM, cut1},
                              {ECut::kPPCUTM, cut1},
                              {ECut::kTOFMAX, cutTofmax}});
@@ -136,7 +139,7 @@ void Detector::SetSpecialPhysicsCuts()
                                   {EProc::kHADR, 1},
                                   {EProc::kMUNU, 1},
                                   {EProc::kDCAY, 1},
-                                  {EProc::kLOSS, 1},
+                                  {EProc::kLOSS, 5},
                                   {EProc::kMULS, 1}});
   }
 }
@@ -227,17 +230,20 @@ Bool_t Detector::ProcessHits(FairVolume* vol)
   const double kMax = TMath::Power(eMax, alpha_p1);
   const double wIon = gasParam.Wion;
 
-  for (Int_t n = 0; n < nColl; n++) {
+  //for (Int_t n = 0; n < nColl; n++) {
     // Use GEANT3 / NA49 expression:
     // P(eDep) ~ k * edep^-gasParam.getExp()
     // eMin(~I) < eDep < eMax(300 electrons)
     // k fixed so that Int_Emin^EMax P(Edep) = 1.
-    const double rndm = fMC->GetRandom()->Rndm();
-    const double eDep = TMath::Power((kMax - kMin) * rndm + kMin, oneOverAlpha_p1);
+    //const double rndm = fMC->GetRandom()->Rndm();
+    //const double eDep = TMath::Power((kMax - kMin) * rndm + kMin, oneOverAlpha_p1);
+
+    // Skip ALICE model here and use pure GEANT
+    const double eDep = fMC->Edep();
     int nel_step = static_cast<int>(((eDep - eMin) / wIon) + 1);
     nel_step = TMath::Min(nel_step, 300); // 300 electrons corresponds to 10 keV
     numberOfElectrons += nel_step;
-  }
+  // }
 
   // LOG(INFO) << "tpc::AddHit" << FairLogger::endl << "Eloss: "
   //<< fMC->Edep() << ", Nelectrons: "

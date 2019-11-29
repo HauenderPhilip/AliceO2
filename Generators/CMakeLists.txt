@@ -25,6 +25,7 @@ o2_add_library(Generators
                        src/PrimaryGenerator.cxx
                        src/InteractionDiamondParam.cxx
                        src/BoxGunParam.cxx
+                       src/SimpleKryptonGenerator.cxx
 		       src/QEDGenParam.cxx
                        src/GeneratorFactory.cxx
                        $<$<BOOL:${pythia_FOUND}>:src/Pythia8Generator.cxx>
@@ -51,6 +52,7 @@ set(headers
     include/Generators/PrimaryGenerator.h
     include/Generators/InteractionDiamondParam.h
     include/Generators/BoxGunParam.h
+    include/Generators/SimpleKryptonGenerator.h
     include/Generators/QEDGenParam.h)
 
 if(pythia_FOUND)
@@ -85,7 +87,7 @@ o2_add_test_root_macro(share/external/tgenerator.C
                        PUBLIC_LINK_LIBRARIES O2::Generators
                        LABELS generators)
 
-		     
+
 install(FILES share/external/extgen.C share/external/pythia6.C
               share/external/tgenerator.C share/external/QEDLoader.C share/external/QEDepem.C
         DESTINATION share/Generators/external/)

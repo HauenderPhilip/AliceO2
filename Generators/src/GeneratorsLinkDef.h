@@ -27,6 +27,7 @@
 
 #pragma link C++ class o2::eventgen::Generator + ;
 #pragma link C++ class o2::eventgen::GeneratorTGenerator + ;
+#pragma link C++ class o2::eventgen::SimpleKryptonGenerator + ;
 #ifdef GENERATORS_WITH_HEPMC3
 #pragma link C++ class o2::eventgen::GeneratorHepMC + ;
 #endif
