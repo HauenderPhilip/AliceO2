@@ -140,7 +140,7 @@ class KrBoxClusterFinder
   /// Here is room for improvements
   static constexpr size_t MaxPads = 138;  ///< Size of the map in pad-direction
   static constexpr size_t MaxRows = 152;  ///< Size of the map in row-direction
-  static constexpr size_t MaxTimes = 550; ///< Size of the map in time-direction
+  static constexpr size_t MaxTimes = 20000; ///< Size of the map in time-direction
 
   /// Values to define ROC boundaries
   static constexpr size_t MaxRowsIROC = 63;  ///< Amount of rows in IROC
