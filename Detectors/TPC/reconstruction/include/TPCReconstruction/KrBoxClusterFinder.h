@@ -130,6 +130,13 @@ class KrBoxClusterFinder
   int mMaxClusterSizePadOROC2 = 3; ///< The "radius" of a cluster in pad direction in OROC2
   int mMaxClusterSizePadOROC3 = 3; ///< The "radius" of a cluster in pad direction in OROC3
 
+  long double mTempMeanPad   = 0;
+  long double mTempSigmaPad  = 0;
+  long double mTempMeanRow   = 0;
+  long double mTempSigmaRow  = 0;
+  long double mTempMeanTime  = 0;
+  long double mTempSigmaTime = 0;
+
   float mQThresholdMax = 10.0;    ///< the Maximum charge in a cluster must exceed this value or it is discarded
   float mQThreshold = 1.0;        ///< every charge which is added to a cluster must exceed this value or it is discarded
   int mMinNumberOfNeighbours = 1; ///< amount of direct neighbours required for a cluster maximum

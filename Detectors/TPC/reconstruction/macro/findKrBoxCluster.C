@@ -27,10 +27,10 @@
 #include <vector>
 #endif
 
-void findKrBoxCluster(int lastTimeBin = 1000, int run = -1, int time = -1, std::string_view gainMapFile = "")
+void findKrBoxCluster(int lastTimeBin = 20000, int run = -1, int time = -1, std::string_view gainMapFile = "")
 {
   // Read the digits:
-  TFile* file = new TFile("tpcdigits.root");
+  TFile* file = new TFile("data_20210308_1704.digits.root");
   TTree* tree = (TTree*)file->Get("o2sim");
   Long64_t nEntries = tree->GetEntries();
   std::cout << "The Tree has " << nEntries << " Entries." << std::endl;

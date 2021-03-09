@@ -98,15 +98,27 @@ void KrBoxClusterFinder::fillAndCorrectMap(std::vector<o2::tpc::Digit>& eventSec
 void KrBoxClusterFinder::updateTempClusterFinal()
 {
   const float oneOverQtot = 1. / mTempCluster.totCharge;
-  mTempCluster.meanPad *= oneOverQtot;
-  mTempCluster.sigmaPad *= oneOverQtot;
-  mTempCluster.meanRow *= oneOverQtot;
-  mTempCluster.sigmaRow *= oneOverQtot;
-  mTempCluster.meanTime *= oneOverQtot;
-  mTempCluster.sigmaTime *= oneOverQtot;
-  mTempCluster.sigmaPad = std::sqrt(std::abs(mTempCluster.sigmaPad - mTempCluster.meanPad * mTempCluster.meanPad));
-  mTempCluster.sigmaRow = std::sqrt(std::abs(mTempCluster.sigmaRow - mTempCluster.meanRow * mTempCluster.meanRow));
-  mTempCluster.sigmaTime = std::sqrt(std::abs(mTempCluster.sigmaTime - mTempCluster.meanTime * mTempCluster.meanTime));
+  mTempMeanPad   *= oneOverQtot;
+  mTempSigmaPad  *= oneOverQtot;
+  mTempMeanRow   *= oneOverQtot;
+  mTempSigmaRow  *= oneOverQtot;
+  mTempMeanTime  *= oneOverQtot;
+  mTempSigmaTime *= oneOverQtot;
+
+  mTempSigmaPad  = std::sqrt(std::abs(mTempSigmaPad  - mTempMeanPad * mTempMeanPad));
+  mTempSigmaRow  = std::sqrt(std::abs(mTempSigmaRow  - mTempMeanRow * mTempMeanRow));
+  mTempSigmaTime = std::sqrt(std::abs(mTempSigmaTime - mTempMeanTime * mTempMeanTime));
+
+
+  mTempCluster.meanPad   = mTempMeanPad;
+  mTempCluster.sigmaPad  = mTempSigmaPad;
+  mTempCluster.meanRow   = mTempMeanRow;
+  mTempCluster.sigmaRow  = mTempSigmaRow;
+  mTempCluster.meanTime  = mTempMeanTime;
+  mTempCluster.sigmaTime = mTempSigmaTime;
+  // mTempCluster.sigmaPad = std::sqrt(std::abs(mTempCluster.sigmaPad - mTempCluster.meanPad * mTempCluster.meanPad));
+  // mTempCluster.sigmaRow = std::sqrt(std::abs(mTempCluster.sigmaRow - mTempCluster.meanRow * mTempCluster.meanRow));
+  // mTempCluster.sigmaTime = std::sqrt(std::abs(mTempCluster.sigmaTime - mTempCluster.meanTime * mTempCluster.meanTime));
 
   const int corPadsMean = mMapperInstance.getNumberOfPadsInRowSector(int(mTempCluster.meanRow));
   const int corPadsMaxCharge = mMapperInstance.getNumberOfPadsInRowSector(int(mTempCluster.maxChargeRow));
@@ -127,14 +139,20 @@ void KrBoxClusterFinder::updateTempCluster(float tempCharge, int tempPad, int te
   mTempCluster.size += 1;
   mTempCluster.totCharge += tempCharge;
 
-  mTempCluster.meanPad += tempPad * tempCharge;
-  mTempCluster.sigmaPad += tempPad * tempPad * tempCharge;
+  // mTempCluster.meanPad += tempPad * tempCharge;
+  // mTempCluster.sigmaPad += tempPad * tempPad * tempCharge;
+  mTempMeanPad  += tempPad * tempCharge;
+  mTempSigmaPad += tempPad * tempPad * tempCharge;
 
-  mTempCluster.meanRow += tempRow * tempCharge;
-  mTempCluster.sigmaRow += tempRow * tempRow * tempCharge;
+  // mTempCluster.meanRow += tempRow * tempCharge;
+  // mTempCluster.sigmaRow += tempRow * tempRow * tempCharge;
+  mTempMeanRow  += tempRow * tempCharge;
+  mTempSigmaRow += tempRow * tempRow * tempCharge;
 
-  mTempCluster.meanTime += tempTime * tempCharge;
-  mTempCluster.sigmaTime += tempTime * tempTime * tempCharge;
+  // mTempCluster.meanTime += tempTime * tempCharge;
+  // mTempCluster.sigmaTime += tempTime * tempTime * tempCharge;
+  mTempMeanTime += tempTime * tempCharge;
+  mTempSigmaTime += tempTime * tempTime * tempCharge;
 
   if (tempCharge > mTempCluster.maxCharge) {
     mTempCluster.maxCharge = tempCharge;
@@ -251,6 +269,13 @@ KrCluster KrBoxClusterFinder::buildCluster(int clusterCenterPad, int clusterCent
 {
   mTempCluster = KrCluster();
   mTempCluster.reset();
+
+  mTempMeanPad   = 0;
+  mTempSigmaPad  = 0;
+  mTempMeanRow   = 0;
+  mTempSigmaRow  = 0;
+  mTempMeanTime  = 0;
+  mTempSigmaTime = 0;
 
   setMaxClusterSize(clusterCenterRow);
 
