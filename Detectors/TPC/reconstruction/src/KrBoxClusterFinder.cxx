@@ -38,35 +38,40 @@ void KrBoxClusterFinder::loadGainMapFromFile(const std::string_view calDetFileNa
   LOGP(info, "Loaded gain map object '{}' from file '{}'", calDetFileName, gainMapName);
 }
 
-void KrBoxClusterFinder::createInitialMap(std::vector<o2::tpc::Digit>& eventSector) {
+void KrBoxClusterFinder::createInitialMap(std::vector<o2::tpc::Digit>& eventSector)
+{
   mSetOfTimeSlices.clear();
   clearTempTimeSlice();
 
-  for(int iTimeSlice = 0; iTimeSlice <= 2*mMaxClusterSizeTime; ++iTimeSlice) {
+  for (int iTimeSlice = 0; iTimeSlice <= 2 * mMaxClusterSizeTime; ++iTimeSlice) {
     fillTempTimeSlice(eventSector, iTimeSlice);
     addTimeSliceToMap();
-    clearTempTimeSlice();  
+    clearTempTimeSlice();
   }
 }
 
-void KrBoxClusterFinder::addTimeSliceToMap() {
+void KrBoxClusterFinder::addTimeSliceToMap()
+{
   mSetOfTimeSlices.emplace_back(mTempTimeSlice);
 }
 
-void KrBoxClusterFinder::popFirstTimeSliceFromMap() {
+void KrBoxClusterFinder::popFirstTimeSliceFromMap()
+{
   mSetOfTimeSlices.pop_front();
 }
 
-void KrBoxClusterFinder::clearTempTimeSlice() {
+void KrBoxClusterFinder::clearTempTimeSlice()
+{
   for (int iRow = 0; iRow < MaxRows; iRow++) {
     std::fill(mTempTimeSlice[iRow].begin(), mTempTimeSlice[iRow].end(), 0.);
   }
 }
 
-void KrBoxClusterFinder::fillADCValueInTempSlice(int cru, int rowInSector, int padInRow, float adcValue) {
+void KrBoxClusterFinder::fillADCValueInTempSlice(int cru, int rowInSector, int padInRow, float adcValue)
+{
   // Correct for pad offset:
   const int padsInRow = mMapperInstance.getNumberOfPadsInRowSector(rowInSector);
-  const int corPad    = padInRow - (padsInRow / 2) + (MaxPads / 2);
+  const int corPad = padInRow - (padsInRow / 2) + (MaxPads / 2);
 
   // Get correction factor from gain map:
   const auto correctionFactorCalDet = mGainMap.get();
@@ -89,11 +94,12 @@ void KrBoxClusterFinder::fillADCValueInTempSlice(int cru, int rowInSector, int p
   mTempTimeSlice[rowInSector][corPad] = adcValue;
 }
 
-void KrBoxClusterFinder::fillTempTimeSlice(std::vector<o2::tpc::Digit>& eventSector, const int timeSlice) {
+void KrBoxClusterFinder::fillTempTimeSlice(std::vector<o2::tpc::Digit>& eventSector, const int timeSlice)
+{
   // No third argument needed since iterator gets popped
   for (std::vector<o2::tpc::Digit>::iterator digit = eventSector.begin(); digit != eventSector.end();) {
     const int time = digit->getTimeStamp();
-    if(time != timeSlice) {
+    if (time != timeSlice) {
       return;
     }
 
@@ -101,8 +107,8 @@ void KrBoxClusterFinder::fillTempTimeSlice(std::vector<o2::tpc::Digit>& eventSec
     mSector = cru / CRU::CRUperSector;
 
     const int rowInSector = digit->getRow();
-    const int padInRow    = digit->getPad();
-    float adcValue        = digit->getChargeFloat();
+    const int padInRow = digit->getPad();
+    float adcValue = digit->getChargeFloat();
 
     fillADCValueInTempSlice(cru, rowInSector, padInRow, adcValue);
 
@@ -112,10 +118,11 @@ void KrBoxClusterFinder::fillTempTimeSlice(std::vector<o2::tpc::Digit>& eventSec
   return;
 }
 
-const std::vector<KrCluster>& KrBoxClusterFinder::loopOverSector(std::vector<o2::tpc::Digit>& eventSector) {
+const std::vector<KrCluster>& KrBoxClusterFinder::loopOverSector(std::vector<o2::tpc::Digit>& eventSector)
+{
   mClusters.clear();
   createInitialMap(eventSector);
-  for(int iTimeSlice = mMaxClusterSizeTime; iTimeSlice < MaxTimes - mMaxClusterSizeTime; ++iTimeSlice) {
+  for (int iTimeSlice = mMaxClusterSizeTime; iTimeSlice < MaxTimes - mMaxClusterSizeTime; ++iTimeSlice) {
     findLocalMaxima(true, iTimeSlice);
     popFirstTimeSliceFromMap();
     fillTempTimeSlice(eventSector, iTimeSlice);
@@ -125,12 +132,14 @@ const std::vector<KrCluster>& KrBoxClusterFinder::loopOverSector(std::vector<o2:
   return mClusters;
 }
 
-void KrBoxClusterFinder::resetADCMap() {
+void KrBoxClusterFinder::resetADCMap()
+{
   // Has to be reimplemented!
   return;
 }
 
-void KrBoxClusterFinder::fillADCValue(int cru, int rowInSector, int padInRow, int timeBin, float adcValue) {
+void KrBoxClusterFinder::fillADCValue(int cru, int rowInSector, int padInRow, int timeBin, float adcValue)
+{
   // Has to be reimplemented!
   return;
 }
@@ -267,35 +276,35 @@ std::vector<std::tuple<int, int, int>> KrBoxClusterFinder::findLocalMaxima(bool 
         }
         noNeighbours++;
       }
-  
+
       if ((iPad - 1 >= 0) && (mSetOfTimeSlices[iTime][iRow][iPad - 1] > mQThreshold)) {
         if (mSetOfTimeSlices[iTime][iRow][iPad - 1] > qMax) {
           continue;
         }
         noNeighbours++;
       }
-  
+
       if ((iRow + 1 < MaxRows) && (mSetOfTimeSlices[iTime][iRow + 1][iPad] > mQThreshold)) {
         if (mSetOfTimeSlices[iTime][iRow + 1][iPad] > qMax) {
           continue;
         }
         noNeighbours++;
       }
-  
+
       if ((iRow - 1 >= 0) && (mSetOfTimeSlices[iTime][iRow - 1][iPad] > mQThreshold)) {
         if (mSetOfTimeSlices[iTime][iRow - 1][iPad] > qMax) {
           continue;
         }
         noNeighbours++;
       }
-  
+
       if ((iTime + 1 < MaxTimes) && (mSetOfTimeSlices[iTime + 1][iRow][iPad] > mQThreshold)) {
         if (mSetOfTimeSlices[iTime + 1][iRow][iPad] > qMax) {
           continue;
         }
         noNeighbours++;
       }
-  
+
       if ((iTime - 1 >= 0) && (mSetOfTimeSlices[iTime - 1][iRow][iPad] > mQThreshold)) {
         if (mSetOfTimeSlices[iTime - 1][iRow][iPad] > qMax) {
           continue;
@@ -305,7 +314,6 @@ std::vector<std::tuple<int, int, int>> KrBoxClusterFinder::findLocalMaxima(bool 
       if (noNeighbours < mMinNumberOfNeighbours) {
         continue;
       }
-  
 
       // Check that this is a local maximum
       // Note that the checking is done so that if 2 charges have the same
@@ -336,7 +344,7 @@ std::vector<std::tuple<int, int, int>> KrBoxClusterFinder::findLocalMaxima(bool 
         continue;
       } else {
         if (directFilling) {
-          
+
           buildCluster(iPad, iRow, iTime, directFilling, timeOffset);
         } else {
           localMaximaCoords.emplace_back(std::make_tuple(iPad, iRow, iTime));
@@ -402,7 +410,6 @@ KrCluster KrBoxClusterFinder::buildCluster(int clusterCenterPad, int clusterCent
           continue;
         }
       }
-      
 
       // Loop over all neighbouring pad bins:
       for (int iPad = -mMaxClusterSizePad; iPad <= mMaxClusterSizePad; iPad++) {
@@ -458,14 +465,12 @@ KrCluster KrBoxClusterFinder::buildCluster(int clusterCenterPad, int clusterCent
   }
   // At the end, out mTempCluster should contain all digits that were assigned to the cluster.
   // So before returning it, we update it one last time to calculate the correct means and sigmas.
-  
+
   updateTempClusterFinal(timeOffset);
 
-  
   if (directFilling) {
     mClusters.emplace_back(mTempCluster);
   }
-  
 
   return mTempCluster;
 }

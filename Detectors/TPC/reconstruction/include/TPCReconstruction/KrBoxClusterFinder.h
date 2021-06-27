@@ -48,11 +48,11 @@
 ///
 /// Implementation:
 /// Old ansatz: Store every digit in a big 3D map
-/// Problem: Memory consumption too large if timebins > 10k 
+/// Problem: Memory consumption too large if timebins > 10k
 /// New solution: Use rolling map aka "The set of timeslices"
 ///
 ///      1 2 3 4 5 6 7
-///   
+///
 ///   1  o o o x o o o
 ///   2  o o o x o o o
 ///      .............
@@ -106,9 +106,9 @@ class KrBoxClusterFinder
  private:
   /// Maximum Map Dimensions
   /// Here is room for improvements
-  static constexpr size_t MaxPads = 138;     ///< Size of the map in pad-direction
-  static constexpr size_t MaxRows = 152;     ///< Size of the map in row-direction
-  size_t MaxTimes = 114048; ///< Size of the map in time-direction
+  static constexpr size_t MaxPads = 138; ///< Size of the map in pad-direction
+  static constexpr size_t MaxRows = 152; ///< Size of the map in row-direction
+  size_t MaxTimes = 114048;              ///< Size of the map in time-direction
 
  public:
   /// Constructor:
@@ -174,7 +174,6 @@ class KrBoxClusterFinder
   void fillADCValue(int cru, int rowInSector, int padInRow, int timeBin, float adcValue);
   void resetADCMap();
 
-
   void createInitialMap(std::vector<o2::tpc::Digit>& eventSector);
   void addTimeSliceToMap();
   void popFirstTimeSliceFromMap();
@@ -184,7 +183,6 @@ class KrBoxClusterFinder
   const std::vector<KrCluster>& loopOverSector(std::vector<o2::tpc::Digit>& eventSector);
 
  private:
-
   // These variables can be varied
   // They were choses such that the box in each readout chamber is approx. the same size
   int mMaxClusterSizeTime = 3; ///< The "radius" of a cluster in time direction
@@ -231,7 +229,7 @@ class KrBoxClusterFinder
   /// \verbatim
   ///
   ///      1 2 3 4 5 6 7
-  ///   
+  ///
   ///   1  o o o x o o o
   ///   2  o o o x o o o
   ///      .............
@@ -239,7 +237,7 @@ class KrBoxClusterFinder
   ///   n  o o o x o o o
   ///
   /// \endverbatim
-  /// 
+  ///
   /// x-axis: Timeslice number
   /// y-axis: Pad number
   /// Time slice four is the interesting one. In there, local maxima are found and clusters are built from it. After it is processed, timeslice number 1 will be dropped and another timeslice will be put at the end of the set.
