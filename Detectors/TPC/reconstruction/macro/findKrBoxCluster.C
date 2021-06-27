@@ -58,10 +58,15 @@ void findKrBoxCluster(int lastTimeBin = 1000, int run = -1, int time = -1, std::
     clFinder->loadGainMapFromFile(gainMapFile);
   }
 
+  clFinder->setMinNumberOfNeighbours(0);
+  clFinder->setMinQTreshold(0);
+  clFinder->setMaxTimes(lastTimeBin);
+
   // Now everything can get processed
   // Loop over all events
-  for (int iEvent = 0; iEvent < nEntries; ++iEvent) {
-    std::cout << iEvent + 1 << "/" << nEntries << std::endl;
+  for (int iEvent = 0; iEvent < 100; ++iEvent) {
+    // std::cout << iEvent + 1 << "/" << nEntries << std::endl;
+    std::cout << iEvent + 1 << "/" << 100 << std::endl;
     tree->GetEntry(iEvent);
     // Each event consists of sectors (atm only two)
 
@@ -70,32 +75,12 @@ void findKrBoxCluster(int lastTimeBin = 1000, int run = -1, int time = -1, std::
       if (sector->size() == 0) {
         continue;
       }
-
-      // Fill map and (if specified) correct with existing gain map
-      clFinder->fillAndCorrectMap(*sector, i);
-
-      // Find all local maxima in sector
-      std::vector<std::tuple<int, int, int>> localMaxima = clFinder->findLocalMaxima();
-
-      // Loop over cluster centers = local maxima
-      for (const std::tuple<int, int, int>& coords : localMaxima) {
-        int padMax = std::get<0>(coords);
-        int rowMax = std::get<1>(coords);
-        int timeMax = std::get<2>(coords);
-
-        if (timeMax >= lastTimeBin) {
-          continue;
-        }
-        // Build total cluster
-        o2::tpc::KrCluster tempCluster = clFinder->buildCluster(padMax, rowMax, timeMax);
-        tempCluster.sector = i;
-
-        clusters.emplace_back(tempCluster);
-      }
+      clFinder->setSector(i);
+      clusters = clFinder->loopOverSector(*sector);
+      // Fill Tree
+      tClusters->Fill();
+      clusters.clear();
     }
-    // Fill Tree
-    tClusters->Fill();
-    clusters.clear();
   }
   // Write Tree to file
   fOut->Write();
