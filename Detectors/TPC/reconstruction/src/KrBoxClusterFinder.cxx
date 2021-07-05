@@ -217,7 +217,7 @@ void KrBoxClusterFinder::updateTempCluster(float tempCharge, int tempPad, int te
 std::vector<std::tuple<int, int, int>> KrBoxClusterFinder::findLocalMaxima(bool directFilling, const int timeOffset)
 {
   std::vector<std::tuple<int, int, int>> localMaximaCoords;
-  
+
   const int iTime = mMaxClusterSizeTime;
   const auto& mapRow = mSetOfTimeSlices[iTime];
   for (int iRow = 0; iRow < MaxRows; iRow++) { // mapRow.size()
