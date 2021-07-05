@@ -75,7 +75,6 @@ void findKrBoxCluster(int lastTimeBin = 1000, int run = -1, int time = -1, std::
       }
 
       clFinder->loopOverSector(*sector, i);
-
     }
     // Fill Tree
     tClusters->Fill();
